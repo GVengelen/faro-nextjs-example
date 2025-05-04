@@ -37,6 +37,7 @@ jobs:
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ steps.meta.outputs.repo }}:${{ steps.meta.outputs.short_sha }}
             ghcr.io/${{ steps.meta.outputs.repo }}:latest
