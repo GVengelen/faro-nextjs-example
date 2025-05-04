@@ -30,7 +30,7 @@ jobs:
         id: extract_tag
         run: |
           commit_message=$(git log -1 --pretty=%B)
-          if [[ $commit_message =~ ^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|other)(\([^)]+\))?: ]]; then
+          if [[ $commit_message =~ ^"(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|other)(\([^)]+\))?:" ]]; then
             tag_type=${BASH_REMATCH[1]}
             tag=$(echo $commit_message | grep -oE '([0-9]+\.[0-9]+\.[0-9]+)' | head -n1)
             if [[ -z $tag ]]; then
