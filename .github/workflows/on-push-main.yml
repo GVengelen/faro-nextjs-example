@@ -31,13 +31,12 @@ jobs:
         run: |
           echo "repo=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
-    
+        
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ steps.meta.outputs.repo }}:${{ steps.extract_tag.outputs.tag }}
             ghcr.io/${{ steps.meta.outputs.repo }}:${{ steps.meta.outputs.short_sha }}
             ghcr.io/${{ steps.meta.outputs.repo }}:latest
