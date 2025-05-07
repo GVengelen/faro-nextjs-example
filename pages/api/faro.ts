@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (value) headers.append(key, Array.isArray(value) ? value.join(', ') : value);
     });
     // Forward to grafana faro
-    const response = await fetch(process.env.NEXT_PUBLIC_FARO_URL || '', {
+    const response = await fetch(process.env.NEXT_PUBLIC_FARO_URL || 'http://alloy-receiver.monitoring.svc.cluster.local:4319/collect', {
       method: req.method,
       headers,
       body: req.body ? JSON.stringify(req.body) : undefined,

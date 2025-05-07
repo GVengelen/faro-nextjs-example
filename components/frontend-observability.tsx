@@ -13,7 +13,7 @@ export default function FrontendObservability(){
     const faro = initializeFaro({
       url: "/api/faro",
       app: {
-        name: process.env.NEXT_PUBLIC_FARO_APP_NAME || 'unknown_service:webjs',
+        name: process.env.NEXT_PUBLIC_FARO_APP_NAME || 'faro_client:webjs',
         namespace: process.env.NEXT_PUBLIC_FARO_APP_NAMESPACE || undefined,
         version: process.env.VERCEL_DEPLOYMENT_ID || '1.0.0',
         environment: process.env.NEXT_PUBLIC_VERCEL_ENV || 'development',
