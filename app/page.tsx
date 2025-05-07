@@ -8,7 +8,7 @@ import { fetchGithubStars } from "../shared/fetchGithubStars";
 
 export default async function Page() {
   const stars = await fetchGithubStars("vercel/next.js");
-
+  console.log("stars", stars);
   return (
     <Layout>
       <div className={styles.container}>
