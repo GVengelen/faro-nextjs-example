@@ -23,7 +23,7 @@ export default function FrontendObservability() {
     initializeFaro({
       url: "/api/faro",
       app: {
-        name: process.env.NEXT_PUBLIC_FARO_APP_NAME || "faro_client:webjs",
+        name: process.env.NEXT_PUBLIC_FARO_APP_NAME || "faro",
         namespace: process.env.NEXT_PUBLIC_FARO_APP_NAMESPACE || undefined,
         version: process.env.VERCEL_DEPLOYMENT_ID || "1.0.0",
         environment: process.env.NEXT_PUBLIC_VERCEL_ENV || "development",
@@ -40,7 +40,7 @@ export default function FrontendObservability() {
 
     logger.info("Initialized Faro frontend observability", {
       endpoint: "/api/faro",
-      appName: process.env.NEXT_PUBLIC_FARO_APP_NAME || "faro_client:webjs",
+      appName: process.env.NEXT_PUBLIC_FARO_APP_NAME || "faro",
     });
   } catch (error) {
     logger.error("Failed to initialize Faro frontend observability", {

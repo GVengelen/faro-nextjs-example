@@ -217,7 +217,7 @@ Create or add lines to a `.env` file in the root of your project with the follow
 ## The URL of your Faro instance, can be found in the Grafana Cloud UI
 NEXT_PUBLIC_FARO_URL=my-url
 ## The name of your app, can be found in the Grafana Cloud UI; should be different for your backend and frontend
-NEXT_PUBLIC_FARO_APP_NAME=next-frontend
+NEXT_PUBLIC_FARO_APP_NAME=faro
 ## The namespace of your app, can be chosen by you and should optimally be the same as the namespace of your backend
 NEXT_PUBLIC_FARO_APP_NAMESPACE=nextjs-example
 
@@ -227,10 +227,18 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 ## Force protobuf
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 ## Set Backend service name
-OTEL_SERVICE_NAME=next-backend
+OTEL_SERVICE_NAME=faro
 ## Customize resource attributes, namespace is a recommended attribute, here we set it to the same value as the frontend namespace to enable correlation
 OTEL_RESOURCE_ATTRIBUTES=service.namespace=nextjs-example
 ```
+
+`service.name` is read from environment variables at runtime. The backend uses:
+
+1. `OTEL_SERVICE_NAME`
+2. `SERVICE_NAME`
+3. fallback: `faro`
+
+For Loki/Mimir consistency, set `OTEL_SERVICE_NAME=faro` in your deployment values.
 
 ## Trace-correlated logging
 

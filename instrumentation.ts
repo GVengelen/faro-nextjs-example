@@ -26,8 +26,13 @@ class SpanNameProcessor implements SpanProcessor {
 }
 
 export function register() {
+    const serviceName =
+        process.env.OTEL_SERVICE_NAME ||
+        process.env.SERVICE_NAME ||
+        "faro";
+
   registerOTel({
-    serviceName: process.env.OTEL_SERVICE_NAME || "unknown_service:node",
+        serviceName,
     spanProcessors: [
         "auto",
         new SpanNameProcessor(),
