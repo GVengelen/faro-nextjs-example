@@ -121,3 +121,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+env:
+  OTEL_SERVICE_NAME: next-backend
+  OTEL_RESOURCE_ATTRIBUTES: service.namespace=nextjs-example
+  NEXT_PUBLIC_ENABLE_BROWSER_LOGS: "false"
+  NEXT_PUBLIC_LOG_LEVEL: info

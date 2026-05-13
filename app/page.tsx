@@ -5,10 +5,17 @@ import Layout from "../components/layout";
 import RepoList from "../components/repo-list";
 
 import { fetchGithubStars } from "../shared/fetchGithubStars";
+import { createLogger } from "../lib/logger";
+
+const logger = createLogger("app.page");
 
 export default async function Page() {
   const stars = await fetchGithubStars("vercel/next.js");
-  console.log("stars", stars);
+  logger.info("Fetched repository stars", {
+    repo: "vercel/next.js",
+    stars,
+  });
+
   return (
     <Layout>
       <div className={styles.container}>

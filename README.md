@@ -216,3 +216,40 @@ OTEL_SERVICE_NAME=next-backend
 ## Customize resource attributes, namespace is a recommended attribute, here we set it to the same value as the frontend namespace to enable correlation
 OTEL_RESOURCE_ATTRIBUTES=service.namespace=nextjs-example
 ```
+
+## Trace-correlated logging
+
+The project now emits structured JSON logs that include `traceId` and `spanId` whenever there is active trace context.
+
+Server logs use the shared logger in `lib/logger.ts` and include fallback extraction from incoming `traceparent` headers in `pages/api/faro.ts`.
+
+Browser logs use `lib/browser-logger.ts` and are disabled by default. Browser logs include best-effort trace context from the `server-timing` `traceparent` value produced by `middleware.ts`.
+
+### Logging configuration
+
+Set these environment variables:
+
+```bash
+# Controls server and browser logger minimum level
+NEXT_PUBLIC_LOG_LEVEL=info
+
+# Enable browser structured logs (default false)
+NEXT_PUBLIC_ENABLE_BROWSER_LOGS=false
+```
+
+For Helm deployments, these values are available under `env` in `charts/faro/values.yaml`.
+
+### Sample server log line
+
+```json
+{"timestamp":"2026-05-13T11:15:00.000Z","level":"info","logger":"shared.fetchGithubStars","message":"Fetched GitHub repository stars","traceId":"8f0af82be6a7f0b810f37f6df95f84aa","spanId":"9d6de3d2ce3f6f09","repo":"vercel/next.js","stars":132000}
+```
+
+### Validate in cluster
+
+1. Deploy the chart with your desired `env` values.
+2. Generate traffic to `/` and `/api/faro`.
+3. Query logs for entries containing `traceId`.
+4. Pivot from a log entry trace ID to traces in Grafana to verify correlation.
+
+If Beyla is also instrumenting this workload, check for duplicate spans and adjust overlap (Beyla vs app instrumentation) if needed.

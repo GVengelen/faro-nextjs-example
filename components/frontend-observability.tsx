@@ -2,15 +2,21 @@
 
 import { faro, getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+import { createBrowserLogger } from '../lib/browser-logger';
+
+const logger = createBrowserLogger('frontend.observability', {
+  enabled: process.env.NEXT_PUBLIC_ENABLE_BROWSER_LOGS === 'true',
+});
 
 export default function FrontendObservability(){
   // skip if already initialized
   if (faro.api) {
+    logger.debug('Faro already initialized');
     return null;
   }
 
   try {
-    const faro = initializeFaro({
+    initializeFaro({
       url: "/api/faro",
       app: {
         name: process.env.NEXT_PUBLIC_FARO_APP_NAME || 'faro_client:webjs',
@@ -28,6 +34,17 @@ export default function FrontendObservability(){
       ],
     });
 
-  } catch (e) {return null;}
+    logger.info('Initialized Faro frontend observability', {
+      endpoint: '/api/faro',
+      appName: process.env.NEXT_PUBLIC_FARO_APP_NAME || 'faro_client:webjs',
+    });
+  } catch (error) {
+    logger.error('Failed to initialize Faro frontend observability', {
+      error,
+    });
+
+    return null;
+  }
+
   return null;
 }
