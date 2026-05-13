@@ -1,9 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { createLogger, traceContextFromTraceparent } from '../../lib/logger';
+import { NextApiRequest, NextApiResponse } from "next";
+import { createLogger, traceContextFromTraceparent } from "../../lib/logger";
 
-const logger = createLogger('api.faro');
+const logger = createLogger("api.faro");
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const traceparentHeader = Array.isArray(req.headers.traceparent)
     ? req.headers.traceparent[0]
     : req.headers.traceparent;
@@ -13,11 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Format headers to be compatible with fetch
     const headers = new Headers();
     Object.entries(req.headers).forEach(([key, value]) => {
-      if (value) headers.append(key, Array.isArray(value) ? value.join(', ') : value);
+      if (value)
+        headers.append(key, Array.isArray(value) ? value.join(", ") : value);
     });
 
-    const url = process.env.NEXT_PUBLIC_FARO_URL || 'http://faro-receiver.monitoring.svc.cluster.local:12347/collect';
-    logger.info('Forwarding Faro request', {
+    const url =
+      process.env.NEXT_PUBLIC_FARO_URL ||
+      "http://faro-receiver.monitoring.svc.cluster.local:12347/collect";
+    logger.info("Forwarding Faro request", {
       url,
       method: req.method,
       ...requestTraceContext,
@@ -30,14 +36,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       body: req.body ? JSON.stringify(req.body) : undefined,
     });
 
-    logger.info('Received Faro upstream response', {
+    logger.info("Received Faro upstream response", {
       statusCode: response.status,
       ...requestTraceContext,
     });
 
     // Send response to client
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
       return res.status(response.status).json(data);
     } else {
@@ -45,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(response.status).send(text);
     }
   } catch (error: any) {
-    logger.error('Error forwarding Faro request', {
+    logger.error("Error forwarding Faro request", {
       error,
       ...requestTraceContext,
     });

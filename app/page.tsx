@@ -26,7 +26,8 @@ export default async function Page() {
 
         <main>
           <h1 className={styles.title}>
-            Welcome to <a href="https://nextjs.org">Next.js</a> with Grafana Cloud!
+            Welcome to <a href="https://nextjs.org">Next.js</a> with Grafana
+            Cloud!
           </h1>
 
           <p className={styles.description}>

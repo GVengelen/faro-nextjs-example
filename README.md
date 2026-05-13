@@ -7,8 +7,8 @@ Grafana Cloud Application Observability for Application Performance Monitoring (
 
 ## Requirements
 
-* Node.js >20
-* docker compose
+- Node.js >20
+- docker compose
 
 ## Running the example
 
@@ -33,7 +33,6 @@ In order to enable observe your next.js project with Grafana Cloud, the followin
 3. add frontend instrumentation
 4. create a proxy for sending data to Grafana
 5. enable configuration needed at runtime
-
 
 ### 1. Enable the instrumentation hook
 
@@ -61,7 +60,11 @@ It contains a few defaults and a custom span processor to reduce the cardinality
 
 ```typescript
 import { Context } from "@opentelemetry/api";
-import { ReadableSpan, Span, SpanProcessor } from "@opentelemetry/sdk-trace-node";
+import {
+  ReadableSpan,
+  Span,
+  SpanProcessor,
+} from "@opentelemetry/sdk-trace-node";
 import { registerOTel } from "@vercel/otel";
 
 /**
@@ -70,30 +73,26 @@ import { registerOTel } from "@vercel/otel";
  * Customize with care!
  */
 class SpanNameProcessor implements SpanProcessor {
-    forceFlush(): Promise<void> {
-        return Promise.resolve();
+  forceFlush(): Promise<void> {
+    return Promise.resolve();
+  }
+  onStart(span: Span, parentContext: Context): void {
+    if (span.name.startsWith("GET /_next/static")) {
+      span.updateName("GET /_next/static");
+    } else if (span.name.startsWith("GET /_next/data")) {
+      span.updateName("GET /_next/data");
     }
-    onStart(span: Span, parentContext: Context): void {
-        if (span.name.startsWith("GET /_next/static")) {
-            span.updateName("GET /_next/static");
-        } else if (span.name.startsWith("GET /_next/data")) {
-            span.updateName("GET /_next/data");
-        }
-    }
-    onEnd(span: ReadableSpan): void {
-    }
-    shutdown(): Promise<void> {
-        return Promise.resolve();
-    }
+  }
+  onEnd(span: ReadableSpan): void {}
+  shutdown(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 export function register() {
   registerOTel({
     serviceName: process.env.OTEL_SERVICE_NAME || "unknown_service:node",
-    spanProcessors: [
-        "auto",
-        new SpanNameProcessor(),
-    ],
+    spanProcessors: ["auto", new SpanNameProcessor()],
   });
 }
 ```
@@ -101,18 +100,23 @@ export function register() {
 Create a `middleware.ts` file in the root of your app to enable strong correlation between frontend and backend spans. This middleware will extract the trace context from the incoming request and inject it into the response headers.
 
 ```typescript
-import {NextRequest, NextResponse} from 'next/server'
-import { trace } from '@opentelemetry/api'
+import { NextRequest, NextResponse } from "next/server";
+import { trace } from "@opentelemetry/api";
 
 export function middleware(request: NextRequest) {
-    const response = NextResponse.next()
-    const current = trace.getActiveSpan();
+  const response = NextResponse.next();
+  const current = trace.getActiveSpan();
 
-    // set server-timing header with traceparent
-    if (current) {
-        response.headers.set('server-timing', `traceparent;desc="00-${current.spanContext().traceId}-${current.spanContext().spanId}-01"`)
-    }
-    return response
+  // set server-timing header with traceparent
+  if (current) {
+    response.headers.set(
+      "server-timing",
+      `traceparent;desc="00-${current.spanContext().traceId}-${
+        current.spanContext().spanId
+      }-01"`,
+    );
+  }
+  return response;
 }
 ```
 
@@ -123,10 +127,14 @@ Create a new component `FrontendObservability` in `components/FrontendObservabil
 ```tsx
 "use client";
 
-import { faro, getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
-import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+import {
+  faro,
+  getWebInstrumentations,
+  initializeFaro,
+} from "@grafana/faro-web-sdk";
+import { TracingInstrumentation } from "@grafana/faro-web-tracing";
 
-export default function FrontendObservability(){
+export default function FrontendObservability() {
   // skip if already initialized
   if (faro.api) {
     return null;
@@ -134,12 +142,13 @@ export default function FrontendObservability(){
 
   try {
     const faro = initializeFaro({
-      url: 'your-faro-url',
+      url: "your-faro-url",
       app: {
-        name: 'your-app-name',
-        namespace: 'your-namespace',
+        name: "your-app-name",
+        namespace: "your-namespace",
         version: process.env.VERCEL_DEPLOYMENT_ID,
-        environment: process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV
+        environment:
+          process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV,
       },
 
       instrumentations: [
@@ -150,35 +159,41 @@ export default function FrontendObservability(){
         new TracingInstrumentation(),
       ],
     });
-
-  } catch (e) {return null;}
+  } catch (e) {
+    return null;
+  }
   return null;
 }
 ```
+
 ### 4. Create a proxy for sending data to Grafana
 
 Create a new API route `pages/api/faro.ts` in your Next.js project. This file will act as a proxy to forward telemetry data to Grafana Faro.
 
 ```typescript
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   try {
     // Format headers to be compatible with fetch
     const headers = new Headers();
     Object.entries(req.headers).forEach(([key, value]) => {
-      if (value) headers.append(key, Array.isArray(value) ? value.join(', ') : value);
+      if (value)
+        headers.append(key, Array.isArray(value) ? value.join(", ") : value);
     });
     // Forward to grafana faro
-    const response = await fetch(process.env.NEXT_PUBLIC_FARO_URL || '', {
+    const response = await fetch(process.env.NEXT_PUBLIC_FARO_URL || "", {
       method: req.method,
       headers,
       body: req.body ? JSON.stringify(req.body) : undefined,
     });
 
     // Send response to client
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
       return res.status(response.status).json(data);
     } else {
@@ -242,7 +257,16 @@ For Helm deployments, these values are available under `env` in `charts/faro/val
 ### Sample server log line
 
 ```json
-{"timestamp":"2026-05-13T11:15:00.000Z","level":"info","logger":"shared.fetchGithubStars","message":"Fetched GitHub repository stars","traceId":"8f0af82be6a7f0b810f37f6df95f84aa","spanId":"9d6de3d2ce3f6f09","repo":"vercel/next.js","stars":132000}
+{
+  "timestamp": "2026-05-13T11:15:00.000Z",
+  "level": "info",
+  "logger": "shared.fetchGithubStars",
+  "message": "Fetched GitHub repository stars",
+  "traceId": "8f0af82be6a7f0b810f37f6df95f84aa",
+  "spanId": "9d6de3d2ce3f6f09",
+  "repo": "vercel/next.js",
+  "stars": 132000
+}
 ```
 
 ### Validate in cluster

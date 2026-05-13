@@ -16,7 +16,12 @@ const LOG_LEVEL_ORDER: Record<LogLevel, number> = {
 };
 
 function normalizeLevel(rawLevel: string | undefined): LogLevel {
-  if (rawLevel === "debug" || rawLevel === "info" || rawLevel === "warn" || rawLevel === "error") {
+  if (
+    rawLevel === "debug" ||
+    rawLevel === "info" ||
+    rawLevel === "warn" ||
+    rawLevel === "error"
+  ) {
     return rawLevel;
   }
   return "info";
@@ -53,12 +58,16 @@ function extractTraceContextFromServerTiming(): JsonRecord {
     return {};
   }
 
-  const navigationEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+  const navigationEntry = performance.getEntriesByType("navigation")[0] as
+    | PerformanceNavigationTiming
+    | undefined;
   if (!navigationEntry || !navigationEntry.serverTiming?.length) {
     return {};
   }
 
-  const traceParentEntry = navigationEntry.serverTiming.find((item) => item.name === "traceparent");
+  const traceParentEntry = navigationEntry.serverTiming.find(
+    (item) => item.name === "traceparent",
+  );
   if (!traceParentEntry?.description) {
     return {};
   }
@@ -79,9 +88,14 @@ function extractTraceContextFromServerTiming(): JsonRecord {
   };
 }
 
-export function createBrowserLogger(name: string, options?: BrowserLoggerOptions) {
-  const minLevel = options?.minLevel ?? normalizeLevel(process.env.NEXT_PUBLIC_LOG_LEVEL);
-  const enabled = options?.enabled ?? process.env.NEXT_PUBLIC_ENABLE_BROWSER_LOGS === "true";
+export function createBrowserLogger(
+  name: string,
+  options?: BrowserLoggerOptions,
+) {
+  const minLevel =
+    options?.minLevel ?? normalizeLevel(process.env.NEXT_PUBLIC_LOG_LEVEL);
+  const enabled =
+    options?.enabled ?? process.env.NEXT_PUBLIC_ENABLE_BROWSER_LOGS === "true";
   const baseContext = options?.baseContext ?? {};
 
   function log(level: LogLevel, message: string, fields?: JsonRecord): void {
@@ -103,9 +117,13 @@ export function createBrowserLogger(name: string, options?: BrowserLoggerOptions
   }
 
   return {
-    debug: (message: string, fields?: JsonRecord) => log("debug", message, fields),
-    info: (message: string, fields?: JsonRecord) => log("info", message, fields),
-    warn: (message: string, fields?: JsonRecord) => log("warn", message, fields),
-    error: (message: string, fields?: JsonRecord) => log("error", message, fields),
+    debug: (message: string, fields?: JsonRecord) =>
+      log("debug", message, fields),
+    info: (message: string, fields?: JsonRecord) =>
+      log("info", message, fields),
+    warn: (message: string, fields?: JsonRecord) =>
+      log("warn", message, fields),
+    error: (message: string, fields?: JsonRecord) =>
+      log("error", message, fields),
   };
 }

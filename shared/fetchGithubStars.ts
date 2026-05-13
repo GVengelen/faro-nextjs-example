@@ -24,7 +24,7 @@ export async function fetchGithubStars(repo: string) {
           return 0;
         }
 
-        const data = await res.json() as { stargazers_count?: number };
+        const data = (await res.json()) as { stargazers_count?: number };
         const stars = data.stargazers_count ?? 0;
 
         logger.info("Fetched GitHub repository stars", {

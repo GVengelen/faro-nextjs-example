@@ -22,7 +22,12 @@ const LOG_LEVEL_ORDER: Record<LogLevel, number> = {
 };
 
 function normalizeLevel(rawLevel: string | undefined): LogLevel {
-  if (rawLevel === "debug" || rawLevel === "info" || rawLevel === "warn" || rawLevel === "error") {
+  if (
+    rawLevel === "debug" ||
+    rawLevel === "info" ||
+    rawLevel === "warn" ||
+    rawLevel === "error"
+  ) {
     return rawLevel;
   }
   return "info";
@@ -85,13 +90,20 @@ function getConsoleMethod(level: LogLevel): (...data: unknown[]) => void {
   return console.error;
 }
 
-export function traceContextFromTraceparent(headerValue?: string): TraceContext {
+export function traceContextFromTraceparent(
+  headerValue?: string,
+): TraceContext {
   if (!headerValue) {
     return {};
   }
 
   const [version, traceId, spanId] = headerValue.trim().split("-");
-  const isValid = version === "00" && traceId && spanId && traceId.length === 32 && spanId.length === 16;
+  const isValid =
+    version === "00" &&
+    traceId &&
+    spanId &&
+    traceId.length === 32 &&
+    spanId.length === 16;
   if (!isValid) {
     return {};
   }
@@ -103,7 +115,8 @@ export function traceContextFromTraceparent(headerValue?: string): TraceContext 
 }
 
 export function createLogger(name: string, options?: LoggerOptions) {
-  const minLevel = options?.minLevel ?? normalizeLevel(process.env.NEXT_PUBLIC_LOG_LEVEL);
+  const minLevel =
+    options?.minLevel ?? normalizeLevel(process.env.NEXT_PUBLIC_LOG_LEVEL);
   const baseContext = options?.baseContext ?? {};
 
   function log(level: LogLevel, message: string, fields?: JsonRecord): void {
@@ -130,9 +143,13 @@ export function createLogger(name: string, options?: LoggerOptions) {
   }
 
   return {
-    debug: (message: string, fields?: JsonRecord) => log("debug", message, fields),
-    info: (message: string, fields?: JsonRecord) => log("info", message, fields),
-    warn: (message: string, fields?: JsonRecord) => log("warn", message, fields),
-    error: (message: string, fields?: JsonRecord) => log("error", message, fields),
+    debug: (message: string, fields?: JsonRecord) =>
+      log("debug", message, fields),
+    info: (message: string, fields?: JsonRecord) =>
+      log("info", message, fields),
+    warn: (message: string, fields?: JsonRecord) =>
+      log("warn", message, fields),
+    error: (message: string, fields?: JsonRecord) =>
+      log("error", message, fields),
   };
 }
